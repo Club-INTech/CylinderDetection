@@ -20,5 +20,5 @@ target_include_directories(cylinder_fitting_library PUBLIC ${CMAKE_CURRENT_SOURC
 target_link_libraries (cylinder_fitting_library ${PCL_LIBRARIES})
 #
 
-target_link_libraries(CylinderDetection PUBLIC cylinder_fitting_library)
+target_link_libraries(CylinderDetection PUBLIC realsense2 cylinder_fitting_library)
 target_include_directories(CylinderDetection PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} shape-fitting/include)
