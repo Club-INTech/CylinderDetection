@@ -16,7 +16,9 @@ include_directories(include
     ${PCL_INCLUDE_DIRS}
 )
 
-add_executable(CylinderDetection src/main.cpp src/opengl_helper.cpp src/opengl_helper.h src/CameraLocation.cpp)
+
+add_executable(CylinderDetection src/main.cpp src/opengl_helper.cpp src/opengl_helper.h src/cylinder_detection.cpp src/cylinder_detection.h src/CameraLocation.cpp)
+
 
 # FITTING LIB
 add_library (cylinder_fitting_library shape-fitting/src/cylinder_fitting.cpp shape-fitting/src/cylinder_fitting_hough.cpp shape-fitting/src/gaussian_sphere.cpp shape-fitting/src/fitting_data.cpp)
