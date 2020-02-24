@@ -17,7 +17,10 @@ vis::window *vis::createWindow(const char* name, int width, int height) {
         glOrtho(0, width, height, 0, -1, +1);
         createColorFrame();
 
-        endFrame(window); // prepare for next frame
+        _quadric = gluNewQuadric();
+        gluQuadricDrawStyle(_quadric, GLU_FILL);
+        glfwSwapBuffers(window);
+        glfwPollEvents();
     }
 
     return window;
@@ -28,6 +31,11 @@ bool vis::keepOpen(vis::window *window) {
 }
 
 void vis::endFrame(vis::window *window) {
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glPopAttrib();
+
     glfwSwapBuffers(window);
     glfwPollEvents();
 }
@@ -37,7 +45,7 @@ void vis::cleanup(vis::window *window) {
     glfwTerminate();
 }
 
-void vis::renderPointCloud(rs2::points points) {
+void vis::setupMatrices() {
     // prepare OpenGL context
     glLoadIdentity();
     glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -55,7 +63,9 @@ void vis::renderPointCloud(rs2::points points) {
 
 
     glEnable(GL_DEPTH_TEST);
+}
 
+void vis::renderPointCloud(rs2::points points) {
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, _colorTexture);
 
@@ -76,10 +86,6 @@ void vis::renderPointCloud(rs2::points points) {
     }
     glEnd();
     glDisable(GL_TEXTURE_2D);
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-    glPopAttrib();
 }
 
 void vis::createColorFrame() {
@@ -129,4 +135,15 @@ void vis::uploadColorFrame(rs2::video_frame frame) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void vis::renderCylinder(float centerX, float centerY, float centerZ, float directionX, float directionY, float directionZ, float height, float radius, float r, float g, float b) {
+    glPushMatrix();
+    glColor4f(r, g, b, 1.0f);
+    glTranslatef(centerX, centerY, centerZ);
+    glTranslatef(0, 0, -height/2);
+    glRotated(-90.0, 1.0, 0.0, 0.0);
+    gluCylinder(_quadric, radius, radius, height, 64, 64);
+    glPopMatrix();
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 }

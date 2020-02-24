@@ -35,6 +35,13 @@ int main() {
 
         // Upload the color frame to OpenGL
         vis::uploadColorFrame(color);
+
+        vis::setupMatrices();
+        vis::renderCylinder(0.0f, 0.0f, 10.0f, // position
+                0.0f, 1.0f, 0.0f, // normal
+                2.0f, // height
+                0.25f, // radius
+                0.0f, 1.0f, 0.0f); // color
         vis::renderPointCloud(points);
         vis::endFrame(glFrame);
     }
