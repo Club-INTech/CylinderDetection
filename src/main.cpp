@@ -1,7 +1,9 @@
 #include <iostream>
 #include <librealsense2/rs.hpp>
+#include <zconf.h>
 //#include "cylinder_fitting.h"
 #include "opengl_helper.h"
+#include "CameraLocation.h"
 
 
 int main() {
@@ -16,6 +18,19 @@ int main() {
 
     printf("Initializing GLFW\n");
     vis::window* glFrame = vis::createWindow("Hello world", 640, 480);
+
+    initRotationEstimator();
+    while(true){
+        sleep(100);
+        float xRotation = get_rotation().x;
+        float yRotation = get_rotation().y;
+        float zRotation = get_rotation().z;
+        char s[300];
+        sprintf(s,"x = %f, y = %f, z = %f\n", xRotation, yRotation, zRotation);
+        printf("%s", s);
+    }
+
+
 
     while(vis::keepOpen(glFrame)) {
         // from https://github.com/IntelRealSense/librealsense/tree/master/examples/pointcloud

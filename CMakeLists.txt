@@ -5,7 +5,7 @@ find_package(PCL REQUIRED)
 find_package(Boost COMPONENTS system filesystem regex REQUIRED)
 
 # visualisation
-find_package(glfw3 3.3 REQUIRED)
+find_package(glfw3 3.2 REQUIRED)
 find_package(OpenGL REQUIRED)
 
 set(CMAKE_CXX_STANDARD 14)
@@ -16,7 +16,7 @@ include_directories(include
     ${PCL_INCLUDE_DIRS}
 )
 
-add_executable(CylinderDetection src/main.cpp src/opengl_helper.cpp src/opengl_helper.h)
+add_executable(CylinderDetection src/main.cpp src/opengl_helper.cpp src/opengl_helper.h src/CameraLocation.cpp)
 
 # FITTING LIB
 add_library (cylinder_fitting_library shape-fitting/src/cylinder_fitting.cpp shape-fitting/src/cylinder_fitting_hough.cpp shape-fitting/src/gaussian_sphere.cpp shape-fitting/src/fitting_data.cpp)
