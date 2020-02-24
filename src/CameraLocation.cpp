@@ -99,11 +99,11 @@ public:
 
 rotation_estimator rotate;
 
-void initRotationEstimator(){
-    rs2::pipeline pipe;
+void initRotationEstimator(rs2::pipeline pipe){
     rs2::config cfg;
 
-
+    cfg.enable_stream(rs2_stream::RS2_STREAM_GYRO,RS2_FORMAT_MOTION_XYZ32F);
+    cfg.enable_stream(rs2_stream::RS2_STREAM_ACCEL, RS2_FORMAT_MOTION_XYZ32F);
 
     auto profile = pipe.start(cfg, [&](rs2::frame frame)
     {

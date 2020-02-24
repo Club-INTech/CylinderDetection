@@ -14,14 +14,16 @@ int main() {
     rs2::config cfg;
     cfg.enable_stream(rs2_stream::RS2_STREAM_COLOR);
     cfg.enable_stream(rs2_stream::RS2_STREAM_DEPTH);
-    pipe.start(cfg);
+    cfg.enable_stream(rs2_stream::RS2_STREAM_GYRO);
+    cfg.enable_stream(rs2_stream::RS2_STREAM_ACCEL);
+    //pipe.start(cfg);
 
     printf("Initializing GLFW\n");
-    vis::window* glFrame = vis::createWindow("Hello world", 640, 480);
+    //vis::window* glFrame = vis::createWindow("Hello world", 640, 480);
 
-    initRotationEstimator();
+    initRotationEstimator(pipe);
     while(true){
-        sleep(100);
+        sleep(1.5);
         float xRotation = get_rotation().x;
         float yRotation = get_rotation().y;
         float zRotation = get_rotation().z;
@@ -30,7 +32,7 @@ int main() {
         printf("%s", s);
     }
 
-
+/*
 
     while(vis::keepOpen(glFrame)) {
         // from https://github.com/IntelRealSense/librealsense/tree/master/examples/pointcloud
@@ -62,5 +64,7 @@ int main() {
     }
 
     vis::cleanup(glFrame);
+    */
     return 0;
+
 }
