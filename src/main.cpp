@@ -2,6 +2,7 @@
 #include <librealsense2/rs.hpp>
 //#include "cylinder_fitting.h"
 #include "opengl_helper.h"
+#include "cylinder_detection.h"
 
 
 int main() {
@@ -17,6 +18,8 @@ int main() {
     printf("Initializing GLFW\n");
     vis::window* glFrame = vis::createWindow("Hello world", 640, 480);
 
+    CylinderDetection* detector = new CylinderDetection();
+
     while(vis::keepOpen(glFrame)) {
         // from https://github.com/IntelRealSense/librealsense/tree/master/examples/pointcloud
         auto data = pipe.wait_for_frames(); // Wait for next set of frames from the camera
@@ -27,6 +30,8 @@ int main() {
 
         // Generate the pointcloud and texture mappings
         points = pc.calculate(depth);
+
+        detector->findCylinders(points);
 
         auto color = frames.get_color_frame();
 
