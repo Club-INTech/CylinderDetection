@@ -77,11 +77,15 @@ void vis::renderPointCloud(rs2::points points) {
 
     for (int i = 0; i < points.size(); i++)
     {
-        if (vertices[i].z)
+        if(i % UNDERSAMPLING != 0)
+            continue;
+        if (vertices[i].z)                // upload the point and texture coordinates only for points we have depth data for
+
         {
-            // upload the point and texture coordinates only for points we have depth data for
-            glVertex3fv(vertices[i]);
-            glTexCoord2fv(tex_coords[i]);
+            if(ABS(vertices[i].z) < 0.5f) {
+                glVertex3fv(vertices[i]);
+                glTexCoord2fv(tex_coords[i]);
+            }
         }
     }
     glEnd();

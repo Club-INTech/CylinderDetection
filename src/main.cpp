@@ -15,13 +15,12 @@ int main() {
     rs2::config cfg;
     cfg.enable_stream(rs2_stream::RS2_STREAM_COLOR);
     cfg.enable_stream(rs2_stream::RS2_STREAM_DEPTH);
-    cfg.enable_stream(rs2_stream::RS2_STREAM_GYRO);
-    cfg.enable_stream(rs2_stream::RS2_STREAM_ACCEL);
-    //pipe.start(cfg);
+    pipe.start(cfg);
 
     printf("Initializing GLFW\n");
-    //vis::window* glFrame = vis::createWindow("Hello world", 640, 480);
+    vis::window* glFrame = vis::createWindow("Hello world", 640, 480);
 
+    /*
     initRotationEstimator(pipe);
     while(true){
         sleep(1.5);
@@ -32,8 +31,8 @@ int main() {
         sprintf(s,"x = %f, y = %f, z = %f\n", xRotation, yRotation, zRotation);
         printf("%s", s);
     }
+*/
 
-/*
 
     CylinderDetection* detector = new CylinderDetection();
 
@@ -48,7 +47,7 @@ int main() {
         // Generate the pointcloud and texture mappings
         points = pc.calculate(depth);
 
-        detector->findCylinders(points);
+        std::vector<Cylinder> cylinders = *(detector->findCylinders(points));
 
         auto color = frames.get_color_frame();
 
@@ -59,17 +58,21 @@ int main() {
         vis::uploadColorFrame(color);
 
         vis::setupMatrices();
-        vis::renderCylinder(0.0f, 0.0f, 10.0f, // position
-                0.0f, 1.0f, 0.0f, // normal
-                2.0f, // height
-                0.25f, // radius
-                0.0f, 1.0f, 0.0f); // color
+        for(int i = 0; i < cylinders.size(); i++) {
+            Cylinder c = cylinders.at(i);
+            printf("cylinder at %f %f %f\n", c.x, c.y, c.z);
+            vis::renderCylinder(c.x, c.y, c.z+1.0f, // position
+                                0.0f, 1.0f, 0.0f, // normal
+                                2.0f, // height
+                                c.radius, // radius
+                                0.0f, 1.0f, 0.0f); // color
+        }
         vis::renderPointCloud(points);
         vis::endFrame(glFrame);
     }
 
     vis::cleanup(glFrame);
-    */
+
     return 0;
 
 }

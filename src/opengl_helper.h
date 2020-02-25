@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 #include <librealsense2/rs.hpp>
 #include <GL/glu.h>
+#include "constants.h"
 
 namespace vis {
     typedef GLFWwindow window;

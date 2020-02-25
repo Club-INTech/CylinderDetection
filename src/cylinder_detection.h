@@ -11,6 +11,7 @@
 #include <pcl/point_types.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/features/normal_3d_omp.h>
+#include "constants.h"
 
 struct Cylinder {
     float x;
@@ -21,13 +22,12 @@ struct Cylinder {
 
 class CylinderDetection {
 private:
-    OrientationAccumulatorSpace* space = new OrientationAccumulatorSpace(900, 10);
-    CylinderFittingHough* hough = new CylinderFittingHough(*space);
+    CylinderFittingHough* hough;
 
 public:
-    CylinderDetection() = default;
+    CylinderDetection();
     ~CylinderDetection() = default;
 
-    std::vector<Cylinder> findCylinders(rs2::points& points);
+    std::vector<Cylinder>* findCylinders(rs2::points& points);
 };
 #endif //CYLINDERDETECTION_CYLINDER_DETECTION_H
