@@ -5,6 +5,10 @@
 #ifndef CYLINDERDETECTION_CAMERALOCATION_H
 #define CYLINDERDETECTION_CAMERALOCATION_H
 
+#include <iostream>
+#include <chrono>
+#include <ctime>
+
 struct float3
 {
     float x, y, z;

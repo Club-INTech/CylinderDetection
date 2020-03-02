@@ -18,6 +18,9 @@ class rotation_estimator
     // theta is the angle of camera rotation in x, y and z components
     float3 theta;
     std::mutex theta_mtx;
+    float3 position;
+    float3 last_position;
+    std::chrono::time_point<std::chrono::system_clock> start;
     /* alpha indicates the part that gyro and accelerometer take in computation of theta; higher alpha gives more weight to gyro, but too high
     values cause drift; lower alpha gives more weight to accelerometer, which is more sensitive to disturbances */
     float alpha = 0.98;
@@ -61,6 +64,11 @@ public:
     {
         // Holds the angle as calculated from accelerometer data
         float3 accel_angle;
+        float3 accel_pos;
+
+        accel_pos.x = accel_data.x;
+        accel_pos.y = accel_data.y;
+        accel_pos.z = accel_data.z;
 
         // Calculate rotation angle from accelerometer data
         accel_angle.z = atan2(accel_data.y, accel_data.z);
@@ -89,10 +97,29 @@ public:
     }
 
     // Returns the current rotation angle
-    float3 get_theta()
-    {
+    float3 get_theta(){
         std::lock_guard<std::mutex> lock(theta_mtx);
         return theta;
+    }
+
+    float3 get_position(){
+        return position;
+    }
+
+    void set_last_position(float3 position){
+        last_position = position;
+    }
+
+    float3 get_last_position(){
+        return last_position;
+    }
+
+    void set_clock(std::chrono::time_point<std::chrono::system_clock> start){
+        this->start = start;
+    }
+
+    std::chrono::time_point<std::chrono::system_clock> get_clock(){
+        this->start;
     }
 };
 
@@ -104,6 +131,7 @@ void initRotationEstimator(rs2::pipeline pipe){
 
     cfg.enable_stream(rs2_stream::RS2_STREAM_GYRO,RS2_FORMAT_MOTION_XYZ32F);
     cfg.enable_stream(rs2_stream::RS2_STREAM_ACCEL, RS2_FORMAT_MOTION_XYZ32F);
+    rotate.set_clock(std::chrono::system_clock::now());
 
     auto profile = pipe.start(cfg, [&](rs2::frame frame)
     {
@@ -132,4 +160,15 @@ void initRotationEstimator(rs2::pipeline pipe){
 
 float3 get_rotation(){
     return rotate.get_theta();
+}
+
+void calc_position(float3 accel_pos){
+    std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end-rotate.get_clock();
+    double t = elapsed_seconds.count();
+    float3 last_position = rotate.get_last_position();
+}
+
+float3 get_position(){
+    return rotate.get_position();
 }
