@@ -12,6 +12,7 @@
 #include <pcl/features/normal_3d.h>
 #include <pcl/features/normal_3d_omp.h>
 #include "constants.h"
+#include "AABB.h"
 
 struct Cylinder {
     float x;
@@ -28,6 +29,6 @@ public:
     CylinderDetection();
     ~CylinderDetection() = default;
 
-    std::vector<Cylinder>* findCylinders(rs2::points& points);
+    std::vector<Cylinder>* findCylinders(rs2::points& points, const AABB& searchArea = INFINITE_BB);
 };
 #endif //CYLINDERDETECTION_CYLINDER_DETECTION_H

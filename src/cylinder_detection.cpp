@@ -15,11 +15,11 @@ CylinderDetection::CylinderDetection() {
     std_devs.push_back(std_dev_eigen);
 
     GaussianMixtureModel* gmm = new GaussianMixtureModel(weights,means,std_devs);
-    GaussianSphere* gaussian_sphere = new GaussianSphere(*gmm, 100);
+    GaussianSphere* gaussian_sphere = new GaussianSphere(*gmm, 10);
     this->hough = new CylinderFittingHough(*gaussian_sphere);
 }
 
-std::vector<Cylinder>* CylinderDetection::findCylinders(rs2::points& points) {
+std::vector<Cylinder>* CylinderDetection::findCylinders(rs2::points& points, const AABB& searchArea) {
     // convert RealSensense2 points to PCL clouds
     pcl::PointCloud<PointT>::Ptr pointCloud(new pcl::PointCloud<PointT>());
     pcl::PointCloud<pcl::Normal>::Ptr estimatedNormals(new pcl::PointCloud<pcl::Normal>());
@@ -31,7 +31,7 @@ std::vector<Cylinder>* CylinderDetection::findCylinders(rs2::points& points) {
         }
         const rs2::vertex vertex = vertices[pointIndex];
         if(vertex.z) {
-            if(ABS(vertex.z) < 0.5f) { // not too far
+            if(searchArea.isPointIn(vertex.x, vertex.y, vertex.z)) { // not too far
                 PointT* point = new PointT(vertex.x, vertex.y, vertex.z);
                 pointCloud.get()->push_back(*point);
             }

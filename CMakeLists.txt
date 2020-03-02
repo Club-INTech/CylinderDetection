@@ -17,7 +17,7 @@ include_directories(include
 )
 
 
-add_executable(CylinderDetection src/main.cpp src/opengl_helper.cpp src/opengl_helper.h src/cylinder_detection.cpp src/cylinder_detection.h src/CameraLocation.cpp src/constants.h)
+add_executable(CylinderDetection src/main.cpp src/opengl_helper.cpp src/opengl_helper.h src/cylinder_detection.cpp src/cylinder_detection.h src/CameraLocation.cpp src/constants.h src/AABB.cpp src/AABB.h)
 
 
 # FITTING LIB
