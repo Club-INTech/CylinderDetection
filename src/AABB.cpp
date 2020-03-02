@@ -9,11 +9,11 @@ maxX(maxX), maxY(maxY), maxZ(maxZ) {
 
 }
 
-bool AABB::isPointIn(float x, float y, float z) {
+bool AABB::isPointIn(float x, float y, float z) const {
     return x >= minX && x <= maxX && y >= minY && y <= maxY && z >= minZ && z <= maxZ;
 }
 
-bool AABB::intersects(const AABB &other) {
+bool AABB::intersects(const AABB &other) const {
 
     return !(minX > other.maxX || maxX < other.minX
             || minY > other.maxY || maxY < other.minY

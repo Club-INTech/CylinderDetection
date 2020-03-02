@@ -21,8 +21,8 @@ public:
 
     ~AABB() = default;
 
-    bool isPointIn(float x, float y, float z);
-    bool intersects(const AABB& other);
+    bool isPointIn(float x, float y, float z) const;
+    bool intersects(const AABB& other) const;
 };
 
 static AABB INFINITE_BB(-INFINITY, -INFINITY, -INFINITY, INFINITY, INFINITY, INFINITY);
