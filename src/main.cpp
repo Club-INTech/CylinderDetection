@@ -17,6 +17,8 @@ int main() {
     printf("Initializing GLFW\n");
     vis::window* glFrame = vis::createWindow("Hello world", 640, 480);
 
+    initRotationEstimator();
+
     printf("Starting acquisition\n");
     auto profile = pipe.start(cfg, [&](rs2::frame frame)
     {
