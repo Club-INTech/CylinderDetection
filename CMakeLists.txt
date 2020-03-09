@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(CylinderDetection)
 
-find_package(PCL REQUIRED)
 find_package(Boost COMPONENTS system filesystem regex REQUIRED)
 
 # visualisation

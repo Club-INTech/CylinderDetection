@@ -10,7 +10,7 @@ int main() {
     rs2::pipeline pipe;
     rs2::config cfg;
     rs2::colorizer falseColors;
-    cfg.enable_stream(rs2_stream::RS2_STREAM_COLOR, RS2_FORMAT_RGB8);
+    cfg.enable_stream(rs2_stream::RS2_STREAM_COLOR, 640, 480, RS2_FORMAT_RGB8);
     cfg.enable_stream(rs2_stream::RS2_STREAM_DEPTH, RS2_FORMAT_Z16);
     cfg.enable_stream(rs2_stream::RS2_STREAM_GYRO, RS2_FORMAT_MOTION_XYZ32F);
     cfg.enable_stream(rs2_stream::RS2_STREAM_ACCEL, RS2_FORMAT_MOTION_XYZ32F);
@@ -36,13 +36,11 @@ int main() {
             auto video = frame.as<rs2::video_frame>();
             if(video && frame.get_profile().stream_type() == RS2_STREAM_COLOR) {
                 vis::uploadVideoFrame(video);
-                printf("video\n");
             }
             auto depth = frame.as<rs2::depth_frame>();
             if(depth && frame.get_profile().stream_type() == RS2_STREAM_DEPTH) {
                 rs2::video_frame colorized = falseColors.colorize(depth);
                 vis::uploadDepthFrame(colorized);
-                printf("depth\n");
             }
         }
 
