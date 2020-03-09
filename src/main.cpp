@@ -39,8 +39,15 @@ int main() {
         float yRotation = get_rotation().y;
         float zRotation = get_rotation().z;
         char s[300];
-        sprintf(s,"x = %f, y = %f, z = %f\n", xRotation, yRotation, zRotation);
-        printf("%s", s);
+        //sprintf(s,"x = %f, y = %f, z = %f\n", xRotation, yRotation, zRotation);
+        //printf("%s", s);
+
+        float xPosition = get_position().x;
+        float yPosition = get_position().y;
+        float zPosition = get_position().z;
+        char p[300];
+        sprintf(p,"x = %f, y = %f, z = %f\n", xPosition, yPosition, zPosition);
+        printf("%s", p);
     });
 
     CylinderDetection* detector = new CylinderDetection();

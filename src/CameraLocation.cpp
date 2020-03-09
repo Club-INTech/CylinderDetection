@@ -18,8 +18,8 @@ class rotation_estimator
     // theta is the angle of camera rotation in x, y and z components
     float3 theta;
     std::mutex theta_mtx;
-    float3 position;
-    float3 last_position;
+    float3 position{};
+    float3 speed{};
     std::chrono::time_point<std::chrono::system_clock> start;
     /* alpha indicates the part that gyro and accelerometer take in computation of theta; higher alpha gives more weight to gyro, but too high
     values cause drift; lower alpha gives more weight to accelerometer, which is more sensitive to disturbances */
@@ -70,6 +70,8 @@ public:
         accel_pos.y = accel_data.y;
         accel_pos.z = accel_data.z;
 
+        calc_position(accel_pos);
+
         // Calculate rotation angle from accelerometer data
         accel_angle.z = atan2(accel_data.y, accel_data.z);
         accel_angle.x = atan2(accel_data.x, sqrt(accel_data.y * accel_data.y + accel_data.z * accel_data.z));
@@ -106,20 +108,24 @@ public:
         return position;
     }
 
-    void set_last_position(float3 position){
-        last_position = position;
+    void set_position(float3 pos){
+        position = pos;
     }
 
-    float3 get_last_position(){
-        return last_position;
-    }
-
-    void set_clock(std::chrono::time_point<std::chrono::system_clock> start){
-        this->start = start;
+    void set_clock(std::chrono::time_point<std::chrono::system_clock> debut){
+        this->start = debut;
     }
 
     std::chrono::time_point<std::chrono::system_clock> get_clock(){
-        this->start;
+        return this->start;
+    }
+
+    float3 get_speed(){
+        return speed;
+    }
+
+    void set_speed(float3 vitesse) {
+        speed = vitesse;
     }
 };
 
@@ -156,13 +162,16 @@ float3 get_rotation(){
     return rotate.get_theta();
 }
 
+float3 get_position(){
+    return rotate.get_position();
+}
+
 void calc_position(float3 accel_pos){
     std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end-rotate.get_clock();
-    double t = elapsed_seconds.count();
-    float3 last_position = rotate.get_last_position();
-}
-
-float3 get_position(){
-    return rotate.get_position();
+    float dt = elapsed_seconds.count();
+    rotate.set_speed(rotate.get_speed() + accel_pos*dt);
+    printf("%f, %f, %f\n", accel_pos.x, accel_pos.y, accel_pos.z);
+    rotate.set_position(rotate.get_position() + rotate.get_speed() * dt);
+    rotate.set_clock(end);
 }
