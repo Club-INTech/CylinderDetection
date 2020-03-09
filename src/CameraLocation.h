@@ -14,6 +14,6 @@ struct float3
     float x, y, z;
 };
 
-void initRotationEstimator(rs2::pipeline);
+void estimateCameraPositionRotation(rs2::frame&);
 float3 get_rotation();
 #endif //CYLINDERDETECTION_CAMERALOCATION_H

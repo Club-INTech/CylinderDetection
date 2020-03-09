@@ -123,39 +123,33 @@ public:
     }
 };
 
-
 rotation_estimator rotate;
 
-void initRotationEstimator(rs2::pipeline pipe){
-    rs2::config cfg;
-
-    cfg.enable_stream(rs2_stream::RS2_STREAM_GYRO,RS2_FORMAT_MOTION_XYZ32F);
-    cfg.enable_stream(rs2_stream::RS2_STREAM_ACCEL, RS2_FORMAT_MOTION_XYZ32F);
+void initRotationEstimator() {
     rotate.set_clock(std::chrono::system_clock::now());
+}
 
-    auto profile = pipe.start(cfg, [&](rs2::frame frame)
+void estimateCameraPositionRotation(rs2::frame& frame) {
+    // Cast the frame that arrived to motion frame
+    auto motion = frame.as<rs2::motion_frame>();
+    // If casting succeeded and the arrived frame is from gyro stream
+    if (motion && motion.get_profile().stream_type() == RS2_STREAM_GYRO && motion.get_profile().format() == RS2_FORMAT_MOTION_XYZ32F)
     {
-        // Cast the frame that arrived to motion frame
-        auto motion = frame.as<rs2::motion_frame>();
-        // If casting succeeded and the arrived frame is from gyro stream
-        if (motion && motion.get_profile().stream_type() == RS2_STREAM_GYRO && motion.get_profile().format() == RS2_FORMAT_MOTION_XYZ32F)
-        {
-            // Get the timestamp of the current frame
-            double ts = motion.get_timestamp();
-            // Get gyro measures
-            rs2_vector gyro_data = motion.get_motion_data();
-            // Call function that computes the angle of motion based on the retrieved measures
-            rotate.process_gyro(gyro_data, ts);
-        }
-        // If casting succeeded and the arrived frame is from accelerometer stream
-        if (motion && motion.get_profile().stream_type() == RS2_STREAM_ACCEL && motion.get_profile().format() == RS2_FORMAT_MOTION_XYZ32F)
-        {
-            // Get accelerometer measures
-            rs2_vector accel_data = motion.get_motion_data();
-            // Call function that computes the angle of motion based on the retrieved measures
-            rotate.process_accel(accel_data);
-        }
-    });
+        // Get the timestamp of the current frame
+        double ts = motion.get_timestamp();
+        // Get gyro measures
+        rs2_vector gyro_data = motion.get_motion_data();
+        // Call function that computes the angle of motion based on the retrieved measures
+        rotate.process_gyro(gyro_data, ts);
+    }
+    // If casting succeeded and the arrived frame is from accelerometer stream
+    if (motion && motion.get_profile().stream_type() == RS2_STREAM_ACCEL && motion.get_profile().format() == RS2_FORMAT_MOTION_XYZ32F)
+    {
+        // Get accelerometer measures
+        rs2_vector accel_data = motion.get_motion_data();
+        // Call function that computes the angle of motion based on the retrieved measures
+        rotate.process_accel(accel_data);
+    }
 }
 
 float3 get_rotation(){

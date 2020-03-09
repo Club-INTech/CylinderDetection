@@ -15,7 +15,8 @@ vis::window *vis::createWindow(const char* name, int width, int height) {
 
         glViewport(0, 0, width, height);
         glOrtho(0, width, height, 0, -1, +1);
-        createColorFrame();
+        createColorTexture();
+        createDepthTexture();
 
         _quadric = gluNewQuadric();
         gluQuadricDrawStyle(_quadric, GLU_FILL);
@@ -31,8 +32,6 @@ bool vis::keepOpen(vis::window *window) {
 }
 
 void vis::endFrame(vis::window *window) {
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glPopAttrib();
 
@@ -51,48 +50,18 @@ void vis::setupMatrices() {
     glPushAttrib(GL_ALL_ATTRIB_BITS);
 
     glClearColor(153.f / 255, 153.f / 255, 153.f / 255, 1);
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    gluPerspective(60, 16.0/9.0, 0.01f, 10.0f);
-
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    gluLookAt(0, 0, 0, 0, 0, 1, 0, -1, 0);
-
-
-    glEnable(GL_DEPTH_TEST);
+    glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void vis::renderPointCloud(rs2::points points) {
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, _colorTexture);
+void vis::createDepthTexture() {
+    GLuint texture;
+    glGenTextures(1, &texture);
 
-    glPointSize(2.0);
-    glBegin(GL_POINTS);
-    /* this segment actually prints the pointcloud */
-    auto vertices = points.get_vertices();              // get vertices
-    auto tex_coords = points.get_texture_coordinates(); // and texture coordinates
-
-    for (int i = 0; i < points.size(); i++)
-    {
-        if(i % UNDERSAMPLING != 0)
-            continue;
-        //if (vertices[i].z)                // upload the point and texture coordinates only for points we have depth data for
-
-        {
-            //if(ABS(vertices[i].z) < 0.5f) {
-                glVertex3fv(vertices[i]);
-                glTexCoord2fv(tex_coords[i]);
-            //}
-        }
-    }
-    glEnd();
-    glDisable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    _depthTexture = texture;
 }
 
-void vis::createColorFrame() {
+void vis::createColorTexture() {
     GLuint texture;
     glGenTextures(1, &texture);
 
@@ -100,7 +69,17 @@ void vis::createColorFrame() {
     _colorTexture = texture;
 }
 
-void vis::uploadColorFrame(rs2::video_frame frame) {
+void vis::uploadDepthFrame(rs2::video_frame& falseColors) {
+    uploadToTexture(_depthTexture, falseColors);
+    _hasDepth = true;
+}
+
+void vis::uploadVideoFrame(rs2::video_frame& frame) {
+    uploadToTexture(_colorTexture, frame);
+    _hasVideo = true;
+}
+
+void vis::uploadToTexture(GLuint texture, rs2::video_frame& frame) {
     // from https://github.com/IntelRealSense/librealsense/blob/master/examples/example.hpp
     if (!frame) return;
 
@@ -113,7 +92,7 @@ void vis::uploadColorFrame(rs2::video_frame frame) {
     auto width = frame.get_width();
     auto height = frame.get_height();
 
-    glBindTexture(GL_TEXTURE_2D, _colorTexture);
+    glBindTexture(GL_TEXTURE_2D, texture);
 
     switch (format)
     {
@@ -141,13 +120,34 @@ void vis::uploadColorFrame(rs2::video_frame frame) {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void vis::renderCylinder(float centerX, float centerY, float centerZ, float directionX, float directionY, float directionZ, float height, float radius, float r, float g, float b) {
-    glPushMatrix();
-    glColor4f(r, g, b, 1.0f);
-    glTranslatef(centerX, centerY, centerZ);
-    glTranslatef(0, 0, -height/2);
-    glRotated(-90.0, 1.0, 0.0, 0.0);
-    gluCylinder(_quadric, radius, radius, height, 64, 64);
-    glPopMatrix();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+void drawTexture(GLuint texture, float minX, float minY, float maxX, float maxY) {
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glEnable(GL_TEXTURE_2D);
+    glBegin(GL_QUADS);
+    {
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex2f(minX, minY);
+
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex2f(maxX, minY);
+
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex2f(maxX, maxY);
+
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex2f(minX, maxY);
+    }
+    glEnd();
+}
+
+void vis::render(window* window) {
+    setupMatrices();
+    if(_hasVideo) {
+        drawTexture(_colorTexture, 0.0f, 0.0f, 0.5f, 1.0f);
+    }
+    if(_hasDepth) {
+        drawTexture(_depthTexture, 0.0f, 0.0f, 0.5f, 1.0f);
+    }
+    endFrame(window);
 }

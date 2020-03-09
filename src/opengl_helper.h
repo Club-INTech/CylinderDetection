@@ -14,6 +14,9 @@ namespace vis {
     typedef GLFWwindow window;
 
     static GLuint _colorTexture;
+    static GLuint _depthTexture;
+    static bool _hasDepth = false;
+    static bool _hasVideo = false;
     static GLUquadric* _quadric;
 
     /**
@@ -38,38 +41,22 @@ namespace vis {
      */
     void endFrame(window* window);
 
+    void setupMatrices();
+
+    void createColorTexture();
+    void createDepthTexture();
+
     /**
      * Frees resources related to the given window
      * @param window
      */
     void cleanup(window* window);
 
-    void renderPointCloud(rs2::points points);
+    void uploadToTexture(GLuint targetTexture, rs2::video_frame& frame);
+    void uploadVideoFrame(rs2::video_frame& frame);
+    void uploadDepthFrame(rs2::video_frame& frame);
 
-    void createColorFrame();
-
-    void uploadColorFrame(rs2::video_frame frame);
-
-    /**
-     * Renders a cylinder in immediate mode
-     * @param centerX cylinder center X
-     * @param centerY cylinder center Y
-     * @param centerZ cylinder center Z
-     * @param directionX cylinder main axis direction X
-     * @param directionY cylinder main axis direction Y
-     * @param directionZ cylinder main axis direction Z
-     * @param height cylinder height
-     * @param radius cylinder height
-     * @param r red component of color
-     * @param g green component of color
-     * @param b blue component of color
-     */
-    void renderCylinder(float centerX, float centerY, float centerZ, float directionX, float directionY, float directionZ, float height, float radius, float r, float g, float b);
-
-    /**
-     * Prepares for an OpenGL render inside world space
-     */
-    void setupMatrices();
+    void render(window* window);
 }
 
 #endif //CYLINDERDETECTION_OPENGL_HELPER_H
