@@ -6,6 +6,7 @@
 #include <mutex>
 #include <cstring>
 #include <cmath>
+#include <Eigen/Dense>
 #include "CameraLocation.h"
 
 
@@ -170,8 +171,21 @@ void calc_position(float3 accel_pos){
     std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end-rotate.get_clock();
     float dt = elapsed_seconds.count();
-    rotate.set_speed(rotate.get_speed() + accel_pos*dt);
-    printf("%f, %f, %f\n", accel_pos.x, accel_pos.y, accel_pos.z);
+
+    Eigen::AngleAxisf rollAngle(rotate.get_theta().x, Eigen::Vector3f::UnitZ());
+    Eigen::AngleAxisf yawAngle(rotate.get_theta().y, Eigen::Vector3f::UnitY());
+    Eigen::AngleAxisf pitchAngle(-rotate.get_theta().z, Eigen::Vector3f::UnitX());
+
+    Eigen::Quaternion<float> q = rollAngle * yawAngle * pitchAngle;
+
+    Eigen::Matrix3f rotationMatrix = q.matrix();
+    Eigen::Vector3f acceleration(accel_pos.x, accel_pos.y, accel_pos.z);
+    Eigen::Vector3f accel_correct = rotationMatrix*acceleration;
+
+    float3 accel_corrected{accel_correct.x(), accel_correct.y(), accel_correct.z()};
+    //-9.80665f
+    rotate.set_speed(rotate.get_speed() + accel_corrected*dt);
+    printf("%f, %f, %f\n", accel_corrected.x, accel_corrected.y, accel_corrected.z);
     rotate.set_position(rotate.get_position() + rotate.get_speed() * dt);
     rotate.set_clock(end);
 }
