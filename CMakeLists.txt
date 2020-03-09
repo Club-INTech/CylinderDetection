@@ -22,6 +22,5 @@ add_executable(CylinderDetection src/main.cpp src/opengl_helper.cpp src/opengl_h
 
 
 # Libs
-target_link_libraries(CylinderDetection PUBLIC realsense2 glfw OpenGL::GL OpenGL::GLU)
-target_link_libraries(CylinderDetection PUBLIC ${OpenCV_LIBS})
 target_include_directories(CylinderDetection PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(CylinderDetection PUBLIC ${OpenCV_LIBS} realsense2 OpenGL::GL OpenGL::GLU glfw ${GLFW_STATIC_LIBRARIES} pthread)
