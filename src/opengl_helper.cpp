@@ -4,22 +4,33 @@
 
 #include "opengl_helper.h"
 
+void checkGLError(const char* where) {
+    GLuint glError = glGetError();
+    if(glError) {
+        fprintf(stderr, "GL Error in [%s] %d = %s\n", where, glError, gluErrorString(glError));
+    }
+}
+
 vis::window *vis::createWindow(const char* name, int width, int height) {
     if(!glfwInit()) {
         return nullptr;
     }
 
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+
     window* window = glfwCreateWindow(width, height, name, nullptr, nullptr);
     if(window) {
         glfwMakeContextCurrent(window);
 
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_TEXTURE_2D);
         glViewport(0, 0, width, height);
-        glOrtho(0, width, height, 0, -1, +1);
+
+        glMatrixMode(GL_PROJECTION);
+
         createColorTexture();
         createDepthTexture();
 
-        _quadric = gluNewQuadric();
-        gluQuadricDrawStyle(_quadric, GLU_FILL);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -33,8 +44,6 @@ bool vis::keepOpen(vis::window *window) {
 
 void vis::endFrame(vis::window *window) {
     glPopMatrix();
-    glPopAttrib();
-
     glfwSwapBuffers(window);
     glfwPollEvents();
 }
@@ -45,19 +54,18 @@ void vis::cleanup(vis::window *window) {
 }
 
 void vis::setupMatrices() {
-    // prepare OpenGL context
-    glLoadIdentity();
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
-
     glClearColor(153.f / 255, 153.f / 255, 153.f / 255, 1);
     glClear(GL_COLOR_BUFFER_BIT);
+
+    // prepare OpenGL context
+    glPushMatrix();
+    glLoadIdentity();
 }
 
 void vis::createDepthTexture() {
     GLuint texture;
     glGenTextures(1, &texture);
 
-    glBindTexture(GL_TEXTURE_2D, texture);
     _depthTexture = texture;
 }
 
@@ -65,7 +73,6 @@ void vis::createColorTexture() {
     GLuint texture;
     glGenTextures(1, &texture);
 
-    glBindTexture(GL_TEXTURE_2D, texture);
     _colorTexture = texture;
 }
 
@@ -83,10 +90,10 @@ void vis::uploadToTexture(GLuint texture, rs2::video_frame& frame) {
     // from https://github.com/IntelRealSense/librealsense/blob/master/examples/example.hpp
     if (!frame) return;
 
-    GLenum err = glGetError();
+/*    GLenum err = glGetError();
     if(err) {
         printf("GL error: %d\n", err);
-    }
+    }*/
 
     auto format = frame.get_profile().format();
     auto width = frame.get_width();
@@ -94,6 +101,8 @@ void vis::uploadToTexture(GLuint texture, rs2::video_frame& frame) {
 
     glBindTexture(GL_TEXTURE_2D, texture);
 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
     switch (format)
     {
         case RS2_FORMAT_RGB8:
@@ -114,29 +123,31 @@ void vis::uploadToTexture(GLuint texture, rs2::video_frame& frame) {
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    //glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void drawTexture(GLuint texture, float minX, float minY, float maxX, float maxY) {
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
+    glBindTexture(GL_TEXTURE_2D, texture);
     glEnable(GL_TEXTURE_2D);
+
     glBegin(GL_QUADS);
     {
-        glTexCoord2f(0.0f, 0.0f);
+        glTexCoord2f(0.0f, 1.0f);
         glVertex2f(minX, minY);
 
-        glTexCoord2f(1.0f, 0.0f);
-        glVertex2f(maxX, minY);
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex2f(minX, maxY);
 
-        glTexCoord2f(1.0f, 1.0f);
+        glTexCoord2f(1.0f, 0.0f);
         glVertex2f(maxX, maxY);
 
-        glTexCoord2f(0.0f, 1.0f);
-        glVertex2f(minX, maxY);
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex2f(maxX, minY);
     }
     glEnd();
 }
@@ -144,10 +155,12 @@ void drawTexture(GLuint texture, float minX, float minY, float maxX, float maxY)
 void vis::render(window* window) {
     setupMatrices();
     if(_hasVideo) {
-        drawTexture(_colorTexture, 0.0f, 0.0f, 0.5f, 1.0f);
+        drawTexture(_colorTexture, -1.0f, -1.0f, 0.0f, 1.0f);
     }
     if(_hasDepth) {
-        drawTexture(_depthTexture, 0.0f, 0.0f, 0.5f, 1.0f);
+        drawTexture(_depthTexture, 0.0f, -1.0f, 1.0f, 1.0f);
     }
     endFrame(window);
+
+    checkGLError("frame end");
 }

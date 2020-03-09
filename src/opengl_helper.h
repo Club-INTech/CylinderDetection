@@ -17,7 +17,6 @@ namespace vis {
     static GLuint _depthTexture;
     static bool _hasDepth = false;
     static bool _hasVideo = false;
-    static GLUquadric* _quadric;
 
     /**
      * Creates a window used for visualisation through GLFW
