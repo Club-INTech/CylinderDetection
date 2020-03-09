@@ -59,7 +59,7 @@ void vis::setupMatrices() {
 
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
-    gluLookAt(0.5, -0.5, -0.25, 0, 0, 1, 0, -1, 0);
+    gluLookAt(0, 0, 0, 0, 0, 1, 0, -1, 0);
 
 
     glEnable(GL_DEPTH_TEST);
@@ -79,13 +79,13 @@ void vis::renderPointCloud(rs2::points points) {
     {
         if(i % UNDERSAMPLING != 0)
             continue;
-        if (vertices[i].z)                // upload the point and texture coordinates only for points we have depth data for
+        //if (vertices[i].z)                // upload the point and texture coordinates only for points we have depth data for
 
         {
-            if(ABS(vertices[i].z) < 0.5f) {
+            //if(ABS(vertices[i].z) < 0.5f) {
                 glVertex3fv(vertices[i]);
                 glTexCoord2fv(tex_coords[i]);
-            }
+            //}
         }
     }
     glEnd();

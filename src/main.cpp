@@ -1,11 +1,8 @@
 #include <iostream>
 #include <librealsense2/rs.hpp>
-#include <zconf.h>
-//#include "cylinder_fitting.h"
 #include "opengl_helper.h"
 #include "CameraLocation.h"
 #include "cylinder_detection.h"
-
 
 int main() {
     printf("Initializing realsense2\n");
@@ -33,6 +30,7 @@ int main() {
     }
 */
 
+    // TODO: remove point cloud
 
     CylinderDetection* detector = new CylinderDetection();
 
@@ -47,7 +45,7 @@ int main() {
         // Generate the pointcloud and texture mappings
         points = pc.calculate(depth);
 
-        std::vector<Cylinder> cylinders = *(detector->findCylinders(points));
+        std::vector<Cylinder> cylinders = *(detector->findCylinders(frames));
 
         auto color = frames.get_color_frame();
 
