@@ -56,12 +56,18 @@ int main() {
             }
         }
 
+        float xRotation = get_rotation().x;
+        float yRotation = get_rotation().y;
+        float zRotation = get_rotation().z;
+        char s[300];
+        sprintf(s,"x = %f, y = %f, z = %f\n", xRotation, yRotation, zRotation);
+        printf("%s", s);
+
         vis::render(glFrame);
     }
 
     vis::cleanup(glFrame);
     pipe.stop();
-    printf("File written to %s\n", filename);
 
 
     return 0;
