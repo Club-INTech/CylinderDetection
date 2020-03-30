@@ -11,7 +11,7 @@ find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 
 set(CMAKE_CXX_STANDARD 14)
 
-set(SRC src/opengl_helper.cpp src/opengl_helper.h src/cylinder_detection.cpp src/cylinder_detection.h src/CameraLocation.cpp src/constants.h src/AABB.cpp src/AABB.h)
+set(SRC src/opengl_helper.cpp src/cylinder_detection.cpp src/cylinder_detection.h src/CameraLocation.cpp src/AABB.cpp src/run.cpp )
 add_executable(CylinderDetection src/main.cpp ${SRC})
 add_executable(Recorder src/record/main.cpp ${SRC})
 add_executable(Playback src/playback/main.cpp ${SRC})

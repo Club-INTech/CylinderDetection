@@ -22,7 +22,7 @@ void CylinderDetection::detect() {
         Mat channels[3];
         split(bgrColor, channels); // séparation en canaux
 
-        int channel = 1;
+        int channel = 2;
 
         float thresholdValue = 0.4f;
         Mat onlyChannel;
