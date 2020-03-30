@@ -10,8 +10,6 @@ CylinderDetection::CylinderDetection() {
 }
 
 void CylinderDetection::detect() {
-    // TODO: use depth frames
-
     rs2::frame frame;
     rs2::video_frame video{frame};
     if(this->video_queue.poll_for_frame(&video)) {
