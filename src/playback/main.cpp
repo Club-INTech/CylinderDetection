@@ -39,8 +39,12 @@ int main() {
     printf("Starting rendering\n");
     CylinderDetection* detector = new CylinderDetection();
 
+    rs2::align align_to_color(RS2_STREAM_COLOR);
+
     while(vis::keepOpen(glFrame)) {
         auto frames = pipe.wait_for_frames();
+
+        frames = align_to_color.process(frames);
 
         for(auto frame : frames) {
             estimateCameraPositionRotation(frame);
@@ -48,13 +52,19 @@ int main() {
             auto video = frame.as<rs2::video_frame>();
             if(video && frame.get_profile().stream_type() == RS2_STREAM_COLOR) {
                 vis::uploadVideoFrame(video);
+
+                detector->newVideoFrame(video);
             }
             auto depth = frame.as<rs2::depth_frame>();
             if(depth && frame.get_profile().stream_type() == RS2_STREAM_DEPTH) {
                 rs2::video_frame colorized = falseColors.colorize(depth);
                 vis::uploadDepthFrame(colorized);
+
+                detector->newDepthFrame(colorized);
             }
         }
+
+        detector->detect();
 
         float xRotation = get_rotation().x;
         float yRotation = get_rotation().y;

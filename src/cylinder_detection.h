@@ -9,6 +9,9 @@
 #include <librealsense2/rs.hpp>
 #include "constants.h"
 #include "AABB.h"
+#include <opencv2/opencv.hpp>
+
+using namespace cv;
 
 struct Cylinder {
     float x;
@@ -17,13 +20,24 @@ struct Cylinder {
     float radius;
 };
 
+constexpr int QUEUE_CAPACITY = 5;
+
 class CylinderDetection {
 private:
+    rs2::frame_queue video_queue{QUEUE_CAPACITY};
+    rs2::frame_queue depth_queue{QUEUE_CAPACITY};
 
 public:
     explicit CylinderDetection();
     ~CylinderDetection() = default;
 
-    std::vector<Cylinder>* findCylinders(rs2::frameset& frames, const AABB& searchArea = INFINITE_BB);
+    /// Détecte les cylindres dans l'image
+    void detect();
+
+    /// Met à jour l'information de couleur à utiliser
+    void newVideoFrame(rs2::video_frame& frame);
+
+    /// Met à jour l'information de profondeur à utiliser. Utilise une version recolorisée de la carte de profondeur
+    void newDepthFrame(rs2::video_frame& frame);
 };
 #endif //CYLINDERDETECTION_CYLINDER_DETECTION_H
