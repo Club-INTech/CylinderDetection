@@ -11,7 +11,10 @@ find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(CylinderDetection src/main.cpp src/opengl_helper.cpp src/opengl_helper.h src/cylinder_detection.cpp src/cylinder_detection.h src/CameraLocation.cpp src/constants.h src/AABB.cpp src/AABB.h)
+set(SRC src/opengl_helper.cpp src/opengl_helper.h src/cylinder_detection.cpp src/cylinder_detection.h src/CameraLocation.cpp src/constants.h src/AABB.cpp src/AABB.h)
+add_executable(CylinderDetection src/main.cpp ${SRC})
+add_executable(Recorder src/record/main.cpp ${SRC})
+add_executable(Playback src/playback/main.cpp ${SRC})
 
 # OpenCV
 
@@ -19,3 +22,9 @@ add_executable(CylinderDetection src/main.cpp src/opengl_helper.cpp src/opengl_h
 # Libs
 target_include_directories(CylinderDetection PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(CylinderDetection PUBLIC ${OpenCV_LIBS} realsense2 OpenGL::GL OpenGL::GLU glfw ${GLFW_STATIC_LIBRARIES} pthread Eigen3::Eigen)
+
+target_include_directories(Recorder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(Recorder PUBLIC ${OpenCV_LIBS} realsense2 OpenGL::GL OpenGL::GLU glfw ${GLFW_STATIC_LIBRARIES} pthread Eigen3::Eigen)
+
+target_include_directories(Playback PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(Playback PUBLIC ${OpenCV_LIBS} realsense2 OpenGL::GL OpenGL::GLU glfw ${GLFW_STATIC_LIBRARIES} pthread Eigen3::Eigen)
