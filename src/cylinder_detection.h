@@ -10,6 +10,8 @@
 #include "constants.h"
 #include "AABB.h"
 #include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 using namespace cv;
 
@@ -26,6 +28,7 @@ class CylinderDetection {
 private:
     rs2::frame_queue video_queue{QUEUE_CAPACITY};
     rs2::frame_queue depth_queue{QUEUE_CAPACITY};
+    rs2::colorizer falseColors;
 
 public:
     explicit CylinderDetection();
@@ -38,6 +41,8 @@ public:
     void newVideoFrame(rs2::video_frame& frame);
 
     /// Met à jour l'information de profondeur à utiliser. Utilise une version recolorisée de la carte de profondeur
-    void newDepthFrame(rs2::video_frame& frame);
+    void newDepthFrame(rs2::depth_frame& frame);
+
+    Mat extract(Mat channels[3], int index);
 };
 #endif //CYLINDERDETECTION_CYLINDER_DETECTION_H

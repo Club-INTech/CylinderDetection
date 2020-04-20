@@ -8,6 +8,7 @@ void run(const char* filename) {
     rs2::pipeline pipe;
     rs2::config cfg;
     rs2::colorizer falseColors;
+    falseColors.set_option(RS2_OPTION_COLOR_SCHEME, 2.0f); // White to Black
 
     if(filename) {
         cfg.enable_device_from_file(filename);
@@ -50,7 +51,7 @@ void run(const char* filename) {
                 rs2::video_frame colorized = falseColors.colorize(depth);
                 vis::uploadDepthFrame(colorized);
 
-                detector->newDepthFrame(colorized);
+                detector->newDepthFrame(depth);
             }
         }
 
