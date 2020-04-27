@@ -15,8 +15,8 @@ void run(const char* filename) {
     }
     cfg.enable_stream(rs2_stream::RS2_STREAM_COLOR, RS2_FORMAT_RGB8);
     cfg.enable_stream(rs2_stream::RS2_STREAM_DEPTH, RS2_FORMAT_Z16);
-    cfg.enable_stream(rs2_stream::RS2_STREAM_GYRO, RS2_FORMAT_MOTION_XYZ32F);
     cfg.enable_stream(rs2_stream::RS2_STREAM_ACCEL, RS2_FORMAT_MOTION_XYZ32F);
+    cfg.enable_stream(rs2_stream::RS2_STREAM_GYRO, RS2_FORMAT_MOTION_XYZ32F);
 
     printf("Initializing GLFW\n");
     vis::window* glFrame = vis::createWindow("Hello world", 640, 480);
@@ -40,7 +40,7 @@ void run(const char* filename) {
         for(auto frame : frames) {
             estimateCameraPositionRotation(frame);
 
-            auto video = frame.as<rs2::video_frame>();
+         /*   auto video = frame.as<rs2::video_frame>();
             if(video && frame.get_profile().stream_type() == RS2_STREAM_COLOR) {
                 vis::uploadVideoFrame(video);
 
@@ -52,17 +52,19 @@ void run(const char* filename) {
                 vis::uploadDepthFrame(colorized);
 
                 detector->newDepthFrame(depth);
-            }
+            }*/
         }
 
         detector->detect();
 
-        float xRotation = get_rotation().x;
-        float yRotation = get_rotation().y;
-        float zRotation = get_rotation().z;
+        float3 rotation{};
+        get_rotation(&rotation);
+        float xRotation = rotation.x;
+        float yRotation = rotation.y;
+        float zRotation = rotation.z;
         char s[300];
         sprintf(s,"x = %f, y = %f, z = %f\n", xRotation, yRotation, zRotation);
-        printf("%s", s);
+     //   printf("%s", s);
 
         vis::render(glFrame);
     }

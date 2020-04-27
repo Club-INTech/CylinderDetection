@@ -17,7 +17,7 @@ const double PI = 3.14159265358979323846;
 class rotation_estimator
 {
     // theta is the angle of camera rotation in x, y and z components
-    float3 theta;
+    float3 theta{0.0f,0.0f, 0.0f};
     std::mutex theta_mtx;
     float3 position{};
     float3 speed{};
@@ -56,12 +56,12 @@ public:
 
         // Apply the calculated change of angle to the current angle (theta)
         std::lock_guard<std::mutex> lock(theta_mtx);
-        theta.z-=gyro_angle.z;
+        theta.x-=gyro_angle.z;
         theta.y-=gyro_angle.y;
-        theta.x+=gyro_angle.x;
+        theta.z+=gyro_angle.x;
     }
 
-    void process_accel(rs2_vector accel_data)
+    void process_accel(rs2_vector accel_data, double ts)
     {
         // Holds the angle as calculated from accelerometer data
         float3 accel_angle;
@@ -71,7 +71,9 @@ public:
         accel_pos.y = accel_data.y;
         accel_pos.z = accel_data.z;
 
-        calc_position(accel_pos);
+        if(!first) {
+            calc_position(accel_pos);
+        }
 
         // Calculate rotation angle from accelerometer data
         accel_angle.z = atan2(accel_data.y, accel_data.z);
@@ -81,6 +83,7 @@ public:
         std::lock_guard<std::mutex> lock(theta_mtx);
         if (first)
         {
+            last_ts_gyro = ts;
             first = false;
             theta = accel_angle;
             // Since we can't infer the angle around Y axis using accelerometer data, we'll use PI as a convetion for the initial pose
@@ -130,7 +133,7 @@ public:
     }
 };
 
-rotation_estimator rotate;
+static rotation_estimator rotate;
 
 void initRotationEstimator() {
     rotate.set_clock(std::chrono::system_clock::now());
@@ -152,19 +155,26 @@ void estimateCameraPositionRotation(rs2::frame& frame) {
     // If casting succeeded and the arrived frame is from accelerometer stream
     if (motion && motion.get_profile().stream_type() == RS2_STREAM_ACCEL && motion.get_profile().format() == RS2_FORMAT_MOTION_XYZ32F)
     {
+        double ts = motion.get_timestamp();
         // Get accelerometer measures
         rs2_vector accel_data = motion.get_motion_data();
         // Call function that computes the angle of motion based on the retrieved measures
-        rotate.process_accel(accel_data);
+        rotate.process_accel(accel_data, ts);
     }
 }
 
-float3 get_rotation(){
-    return rotate.get_theta();
+void get_rotation(float3* out) {
+    float3 theta = rotate.get_theta();
+    out->x = theta.x;
+    out->y = theta.y;
+    out->z = theta.z;
 }
 
-float3 get_position(){
-    return rotate.get_position();
+void get_position(float3* out) {
+    float3 position = rotate.get_position();
+    out->x = position.x;
+    out->y = position.y;
+    out->z = position.z;
 }
 
 void calc_position(float3 accel_pos){
@@ -172,20 +182,22 @@ void calc_position(float3 accel_pos){
     std::chrono::duration<double> elapsed_seconds = end-rotate.get_clock();
     float dt = elapsed_seconds.count();
 
+    // basé sur https://github.com/IntelRealSense/librealsense/blob/master/examples/motion/rs-motion.cpp#L84
+    Eigen::AngleAxisf pitchAngle((rotate.get_theta().z-PI/2), Eigen::Vector3f::UnitX());
+    Eigen::AngleAxisf yawAngle(-rotate.get_theta().y, Eigen::Vector3f::UnitY());
     Eigen::AngleAxisf rollAngle(rotate.get_theta().x, Eigen::Vector3f::UnitZ());
-    Eigen::AngleAxisf yawAngle(rotate.get_theta().y, Eigen::Vector3f::UnitY());
-    Eigen::AngleAxisf pitchAngle(-rotate.get_theta().z, Eigen::Vector3f::UnitX());
 
-    Eigen::Quaternion<float> q = rollAngle * yawAngle * pitchAngle;
+    Eigen::Quaternion<float> q = yawAngle * pitchAngle * rollAngle;
+    q = q.conjugate();
 
     Eigen::Matrix3f rotationMatrix = q.matrix();
     Eigen::Vector3f acceleration(accel_pos.x, accel_pos.y, accel_pos.z);
     Eigen::Vector3f accel_correct = rotationMatrix*acceleration;
 
-    float3 accel_corrected{accel_correct.x(), accel_correct.y(), accel_correct.z()};
-    //-9.80665f
+    float gravity_average = 9.722579856f; // basé sur 126 mesures de suite avec la caméra posée au sol
+    float3 accel_corrected{accel_correct.x(), accel_correct.y()-gravity_average, accel_correct.z()};
     rotate.set_speed(rotate.get_speed() + accel_corrected*dt);
-    printf("%f, %f, %f\n", accel_corrected.x, accel_corrected.y, accel_corrected.z);
     rotate.set_position(rotate.get_position() + rotate.get_speed() * dt);
+    printf("%f, %f, %f\n", accel_corrected.x, accel_corrected.y, accel_corrected.z);
     rotate.set_clock(end);
 }
