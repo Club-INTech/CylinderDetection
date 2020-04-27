@@ -93,7 +93,6 @@ void CylinderDetection::detect() {
                 /// Find contours
                 findContours( canny_output, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
 
-                Mat drawing = Mat::zeros(canny_output.size(), CV_8UC3);
                 for( int i = 0; i< contours.size(); i++ )
                 {
                     std::vector<Point> contour = contours[i];
