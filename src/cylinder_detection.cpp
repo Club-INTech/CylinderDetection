@@ -167,6 +167,7 @@ void CylinderDetection::createPacket(std::string& packet) {
     packet.clear();
 
     // TODO: trouver un moyen propre d'envoyer l'orientation
+    packet += "!§"; // channel
     packet += "0 0 0 ";
 
     // on évite de lire n'importe quoi
