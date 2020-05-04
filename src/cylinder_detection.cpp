@@ -39,11 +39,14 @@ void CylinderDetection::detect() {
             Mat resized;
             resize(depthImage, resized, Size(video.get_width(), video.get_height())); // agrandit l'image pour être à la même taille que le masque (nécessaire pour copyTo)
 
+            std::unique_lock lock(shapesMutex);
+            shapes.clear();
             for(int regionIndex = 0; regionIndex < 2;regionIndex++) {
 
                 Mat regionOfInterest;
                 Mat channel = regionIndex == 0 ? redChannel : greenChannel;
-                copyTo(resized, regionOfInterest, channel); // on utilise les pixels potentiels de gobelets pour récupérer la profondeur qui nous intéresse
+                CylinderColor cylinderColor = regionIndex == 0 ? CylinderColor::Red : CylinderColor::Green;
+                resized.copyTo(regionOfInterest, channel); // on utilise les pixels potentiels de gobelets pour récupérer la profondeur qui nous intéresse
 
                 /*
                 // Application de K-Means pour séparer les différents objets
@@ -109,16 +112,24 @@ void CylinderDetection::detect() {
                         char distance[50];
                         sprintf(distance, "%fm", dist);
                         putText(depthImage, distance, center, FONT_HERSHEY_SIMPLEX, 1.0, color);
+
+                        // TODO: calculer ces valeurs correctement
+                        float cylinderCenterX = center.x;
+                        float cylinderCenterY = center.y;
+                        float radius = 1.0f;
+                        Cylinder cylinder { .x = cylinderCenterX, .y = cylinderCenterY, .z=(float)dist, .radius=radius, .color=cylinderColor };
+                        shapes.push_back(cylinder);
                     }
                 }
 
             }
-            imshow("Segmentation", depthImage);
-            waitKey(1);
-        }
+            lock.unlock(); // obligé de unlock ici car il peut y avoir des calculs après qui n'ont rien à voir
 
+            imshow("Segmentation", depthImage);
+        }
         waitKey(1);
     }
+
 
 }
 
@@ -154,5 +165,44 @@ Mat CylinderDetection::extract(Mat *channels, int index) {
 
 void CylinderDetection::createPacket(std::string& packet) {
     packet.clear();
+
+    // TODO: trouver un moyen propre d'envoyer l'orientation
+    packet += "0 0 0 ";
+
+    // on évite de lire n'importe quoi
+    std::shared_lock lock(shapesMutex);
+    packet += std::to_string(shapes.size());
+    packet += " ";
+    for(const auto& shape : shapes) {
+        packet += "cylinder ";
+        switch(shape.color) {
+            case Green:
+                packet += "green ";
+                break;
+
+            case Red:
+                packet += "red ";
+                break;
+        }
+
+        // TODO: calcul de la hauteur
+        packet += "1 ";
+        packet += std::to_string(shape.x);
+        packet += " ";
+        packet += std::to_string(shape.y);
+        packet += " ";
+        packet += std::to_string(shape.z);
+        packet += " ";
+
+        // TODO: calcul de la position sur la table
+        packet += std::to_string(shape.x);
+        packet += " ";
+        packet += std::to_string(shape.y);
+        packet += " ";
+        packet += std::to_string(shape.z);
+        packet += " ";
+
+    }
+
     packet += "\n";
 }

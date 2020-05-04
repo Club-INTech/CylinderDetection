@@ -9,7 +9,7 @@ find_package(OpenGL REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 set(SRC src/opengl_helper.cpp src/cylinder_detection.cpp src/cylinder_detection.h src/CameraLocation.cpp src/AABB.cpp src/run.cpp src/network/Client.cpp)
 add_executable(CylinderDetection src/main.cpp ${SRC})

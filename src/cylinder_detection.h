@@ -7,6 +7,8 @@
 
 #include <vector>
 #include <librealsense2/rs.hpp>
+#include <mutex>  // For std::unique_lock
+#include <shared_mutex>
 #include "constants.h"
 #include "AABB.h"
 #include <opencv2/opencv.hpp>
@@ -15,11 +17,17 @@
 
 using namespace cv;
 
+enum CylinderColor {
+    Red,
+    Green
+};
+
 struct Cylinder {
     float x;
     float y;
     float z;
     float radius;
+    CylinderColor color;
 };
 
 constexpr int QUEUE_CAPACITY = 5;
@@ -29,6 +37,8 @@ private:
     rs2::frame_queue video_queue{QUEUE_CAPACITY};
     rs2::frame_queue depth_queue{QUEUE_CAPACITY};
     rs2::colorizer falseColors;
+    std::vector<Cylinder> shapes;
+    mutable std::shared_mutex shapesMutex; // RWLock pour l'ajout des cylindres et la lecture dans 'shapes'
 
 public:
     explicit CylinderDetection();

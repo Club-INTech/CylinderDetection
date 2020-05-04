@@ -4,6 +4,8 @@
 
 #include "run.h"
 
+constexpr bool connectToHL = true;
+
 void run(const char* filename) {
     printf("Initializing realsense2\n");
     rs2::pipeline pipe;
@@ -27,7 +29,10 @@ void run(const char* filename) {
     printf("Starting acquisition\n");
 
     Client highLevel(address, port);
-    highLevel.connect();
+
+    if(connectToHL) {
+        highLevel.connect();
+    }
 
     auto profile = pipe.start(cfg);
 
