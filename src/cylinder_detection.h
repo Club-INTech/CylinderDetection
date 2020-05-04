@@ -44,5 +44,7 @@ public:
     void newDepthFrame(rs2::depth_frame& frame);
 
     Mat extract(Mat channels[3], int index);
+
+    void createPacket(std::string& packet);
 };
 #endif //CYLINDERDETECTION_CYLINDER_DETECTION_H

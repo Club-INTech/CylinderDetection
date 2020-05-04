@@ -151,3 +151,8 @@ Mat CylinderDetection::extract(Mat *channels, int index) {
     erode(brightChannel, result, element);
     return result;
 }
+
+void CylinderDetection::createPacket(std::string& packet) {
+    packet.clear();
+    packet += "\n";
+}

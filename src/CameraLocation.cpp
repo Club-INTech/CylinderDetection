@@ -198,6 +198,6 @@ void calc_position(float3 accel_pos){
     float3 accel_corrected{accel_correct.x(), accel_correct.y()-gravity_average, accel_correct.z()};
     rotate.set_speed(rotate.get_speed() + accel_corrected*dt);
     rotate.set_position(rotate.get_position() + rotate.get_speed() * dt);
-    printf("%f, %f, %f\n", accel_corrected.x, accel_corrected.y, accel_corrected.z);
+   // printf("%f, %f, %f\n", accel_corrected.x, accel_corrected.y, accel_corrected.z);
     rotate.set_clock(end);
 }

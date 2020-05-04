@@ -3,6 +3,7 @@
 //
 
 #include "run.h"
+
 void run(const char* filename) {
     printf("Initializing realsense2\n");
     rs2::pipeline pipe;
@@ -25,6 +26,9 @@ void run(const char* filename) {
 
     printf("Starting acquisition\n");
 
+    Client highLevel(address, port);
+    highLevel.connect();
+
     auto profile = pipe.start(cfg);
 
     printf("Starting rendering\n");
@@ -32,7 +36,15 @@ void run(const char* filename) {
 
     rs2::align align_to_color(RS2_STREAM_COLOR);
 
+    std::string incomingMessage;
+    std::string outcomingMessage;
+
     while(vis::keepOpen(glFrame)) {
+        if(highLevel.receive(incomingMessage, false)) {
+            // TODO: respond to incoming messages
+            std::cout << "Received: " << incomingMessage << std::endl;
+        }
+
         auto frames = pipe.wait_for_frames();
 
         frames = align_to_color.process(frames);
@@ -40,7 +52,7 @@ void run(const char* filename) {
         for(auto frame : frames) {
             estimateCameraPositionRotation(frame);
 
-         /*   auto video = frame.as<rs2::video_frame>();
+            auto video = frame.as<rs2::video_frame>();
             if(video && frame.get_profile().stream_type() == RS2_STREAM_COLOR) {
                 vis::uploadVideoFrame(video);
 
@@ -52,10 +64,15 @@ void run(const char* filename) {
                 vis::uploadDepthFrame(colorized);
 
                 detector->newDepthFrame(depth);
-            }*/
+            }
         }
 
         detector->detect();
+
+        if(highLevel) { // si on a une connexion
+            detector->createPacket(outcomingMessage);
+            highLevel.send(outcomingMessage);
+        }
 
         float3 rotation{};
         get_rotation(&rotation);
