@@ -11,7 +11,7 @@ Un packet suit la forme suivante:
 ## Définition de forme
 Une forme est décrite avec la structure suivante:
 
-| Type de forme                         | Couleur                          | Hauteur de la forme (cm)   | Position locale de la forme                      | Position sur la table estimée                          |
+| Type de forme                         | Couleur                          | Hauteur de la forme (m)   | Position locale de la forme                      | Position sur la table estimée                          |
 |---------------------------------------|----------------------------------|----------------------------|--------------------------------------------------|--------------------------------------------------------|
 | 'cylinder' seulement pour le moment   | 'green' ou 'red' pour le moment  | Float                      | X Y Z, 3 float, dans le référentiel de la caméra | X Y Z, 3 float, dans le référentiel estimé de la table |
 

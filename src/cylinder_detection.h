@@ -38,10 +38,11 @@ private:
     rs2::frame_queue depth_queue{QUEUE_CAPACITY};
     rs2::colorizer falseColors;
     std::vector<Cylinder> shapes;
+    rs2_intrinsics& intrinsics;
     mutable std::shared_mutex shapesMutex; // RWLock pour l'ajout des cylindres et la lecture dans 'shapes'
 
 public:
-    explicit CylinderDetection();
+    explicit CylinderDetection(rs2_intrinsics&);
     ~CylinderDetection() = default;
 
     /// Détecte les cylindres dans l'image

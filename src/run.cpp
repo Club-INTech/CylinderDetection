@@ -35,9 +35,11 @@ void run(const char* filename) {
     }
 
     auto profile = pipe.start(cfg);
+    auto colorStream = profile.get_stream(RS2_STREAM_COLOR).as<rs2::video_stream_profile>();
+    auto intrinsics = colorStream.get_intrinsics();
 
     printf("Starting rendering\n");
-    CylinderDetection* detector = new CylinderDetection();
+    CylinderDetection* detector = new CylinderDetection(intrinsics);
 
     rs2::align align_to_color(RS2_STREAM_COLOR);
 

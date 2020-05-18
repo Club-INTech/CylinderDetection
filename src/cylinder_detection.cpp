@@ -3,8 +3,9 @@
 //
 
 #include "cylinder_detection.h"
+#include <librealsense2/rsutil.h>
 
-CylinderDetection::CylinderDetection() {
+CylinderDetection::CylinderDetection(rs2_intrinsics& intrinsics): intrinsics(intrinsics) {
     namedWindow("Test OpenCV - Color", WINDOW_AUTOSIZE);
     namedWindow("Test OpenCV - Depth", WINDOW_AUTOSIZE);
 
@@ -113,11 +114,11 @@ void CylinderDetection::detect() {
                         sprintf(distance, "%fm", dist);
                         putText(depthImage, distance, center, FONT_HERSHEY_SIMPLEX, 1.0, color);
 
-                        // TODO: calculer ces valeurs correctement
-                        float cylinderCenterX = center.x;
-                        float cylinderCenterY = center.y;
+                        float point3D[3];
+                        float pixel[] = { center.x, center.y };
+                        rs2_deproject_pixel_to_point(point3D, &intrinsics, pixel, dist);
                         float radius = 1.0f;
-                        Cylinder cylinder { .x = cylinderCenterX, .y = cylinderCenterY, .z=(float)dist, .radius=radius, .color=cylinderColor };
+                        Cylinder cylinder { .x = point3D[0], .y = point3D[1], .z=(float)dist, .radius=radius, .color=cylinderColor };
                         shapes.push_back(cylinder);
                     }
                 }
