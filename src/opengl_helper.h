@@ -5,6 +5,7 @@
 #ifndef CYLINDERDETECTION_OPENGL_HELPER_H
 #define CYLINDERDETECTION_OPENGL_HELPER_H
 
+#ifdef USE_GUI
 #include <GLFW/glfw3.h>
 #include <librealsense2/rs.hpp>
 #include <GL/glu.h>
@@ -57,5 +58,5 @@ namespace vis {
 
     void render(window* window);
 }
-
+#endif
 #endif //CYLINDERDETECTION_OPENGL_HELPER_H

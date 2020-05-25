@@ -6,9 +6,10 @@
 #include <librealsense2/rsutil.h>
 
 CylinderDetection::CylinderDetection(rs2_intrinsics& intrinsics): intrinsics(intrinsics) {
+#ifdef USE_GUI
     namedWindow("Test OpenCV - Color", WINDOW_AUTOSIZE);
     namedWindow("Test OpenCV - Depth", WINDOW_AUTOSIZE);
-
+#endif
     this->falseColors.set_option(RS2_OPTION_COLOR_SCHEME, 2.0f); // White to Black
 }
 
@@ -27,9 +28,9 @@ void CylinderDetection::detect() {
         Mat greenChannel = extract(channels, 1);
 
         Mat cups = redChannel + greenChannel;
-
+#ifdef USE_GUI
         imshow("Test OpenCV - Color", cups);
-
+#endif
         rs2::depth_frame depth{frame};
         if(this->depth_queue.poll_for_frame(&depth)) {
             rs2::video_frame colorizedDepth = falseColors.process(depth);
@@ -126,7 +127,9 @@ void CylinderDetection::detect() {
             }
             lock.unlock(); // obligé de unlock ici car il peut y avoir des calculs après qui n'ont rien à voir
 
+#ifdef USE_GUI
             imshow("Segmentation", depthImage);
+#endif
         }
         waitKey(1);
     }

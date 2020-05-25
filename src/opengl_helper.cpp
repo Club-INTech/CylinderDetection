@@ -4,6 +4,7 @@
 
 #include "opengl_helper.h"
 
+#ifdef USE_GUI
 void checkGLError(const char* where) {
     GLuint glError = glGetError();
     if(glError) {
@@ -164,3 +165,4 @@ void vis::render(window* window) {
 
     checkGLError("frame end");
 }
+#endif

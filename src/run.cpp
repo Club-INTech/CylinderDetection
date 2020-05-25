@@ -22,8 +22,9 @@ void run(const char* filename) {
     cfg.enable_stream(rs2_stream::RS2_STREAM_GYRO, RS2_FORMAT_MOTION_XYZ32F);
 
     printf("Initializing GLFW\n");
+#ifdef USE_GUI
     vis::window* glFrame = vis::createWindow("Hello world", 640, 480);
-
+#endif
     initRotationEstimator();
 
     printf("Starting acquisition\n");
@@ -46,7 +47,11 @@ void run(const char* filename) {
     std::string incomingMessage;
     std::string outcomingMessage;
 
+#ifdef USE_GUI
     while(vis::keepOpen(glFrame)) {
+#else
+    while(true) {
+#endif
         if(highLevel.receive(incomingMessage, false)) {
             // TODO: respond to incoming messages
             std::cout << "Received: " << incomingMessage << std::endl;
@@ -61,15 +66,17 @@ void run(const char* filename) {
 
             auto video = frame.as<rs2::video_frame>();
             if(video && frame.get_profile().stream_type() == RS2_STREAM_COLOR) {
+#ifdef USE_GUI
                 vis::uploadVideoFrame(video);
-
+#endif
                 detector->newVideoFrame(video);
             }
             auto depth = frame.as<rs2::depth_frame>();
             if(depth && frame.get_profile().stream_type() == RS2_STREAM_DEPTH) {
                 rs2::video_frame colorized = falseColors.colorize(depth);
+#ifdef USE_GUI
                 vis::uploadDepthFrame(colorized);
-
+#endif
                 detector->newDepthFrame(depth);
             }
         }
@@ -90,10 +97,13 @@ void run(const char* filename) {
         sprintf(s,"x = %f, y = %f, z = %f\n", xRotation, yRotation, zRotation);
      //   printf("%s", s);
 
+#ifdef USE_GUI
         vis::render(glFrame);
+#endif
     }
-
+#ifdef USE_GUI
     vis::cleanup(glFrame);
+#endif
     pipe.stop();
 
 }
