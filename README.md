@@ -8,15 +8,16 @@
 * PointCloudLibrary (PCL)
 
 ## TODO
-[ ] Comm avec le HL
-    [ ] Client ou serveur?
-    [ ] Protocole
-    [ ] Channel
-    [ ] Qu'est-ce qu'on envoie?
+[x] Comm avec le HL
+
+    [X] Serveur
+    [x] Protocole
+    [x] Channel
+    [x] Qu'est-ce qu'on envoie?
     
-[ ] Déterminer position (+vitesse?) et orientation
+[x] Déterminer position (+vitesse?) et orientation
 
 [ ] Détection des formes
-    [ ] Détection cylindres
-    [ ] Affichage en debug des cylindres détectés
+    [x] Détection cylindres
+    [x] Affichage en debug des cylindres détectés
     [ ] Détection d'autres formes
